@@ -355,7 +355,7 @@ def main(time_spacings=np.logspace(2, 0, num=5).astype(np.int8)):
 #%% Run main():
 
 if __name__ == "__main__":
-    exceptions, figures = main(time_spacings=[100, 1])    
+    exceptions, figures = main(time_spacings=[1])    
     for k, v in figures.items():
         print("\n" + "-"*15 + "  tstep: {:.2f}  ".format(k.tstep) + "-"*15)
         plt.show(v['neutron_population_plot'])
