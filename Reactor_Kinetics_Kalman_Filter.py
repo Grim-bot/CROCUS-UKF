@@ -359,4 +359,4 @@ def main(time_spacings=np.logspace(0, 2, num=5).astype(np.int8)):
 #%% Run main():
 
 if __name__ == "__main__":
-    figs, exceptions = main()    
+    exceptions, figures = main()    
