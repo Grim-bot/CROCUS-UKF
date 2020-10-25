@@ -52,7 +52,7 @@ conda install --file requirements_3-7-3.txt
 
 #### Running a simulation and generating figures
 
-Once you have installed dependencies and cloned the repository, simply run the `main` function of [`Reactor_Kinetics_Kalman_Filter.py`](Reactor_Kinetics_Kalman_Filter.py). If you run it in an IPython shell (e.g., using an IDE), the figures will appear in the console. Regardless, all figures are saved in pdf format.
+Once you have installed dependencies and cloned the repository, simply run the `main` function of [`Reactor_Kinetics_Kalman_Filter.py`](Reactor_Kinetics_Kalman_Filter.py). If you run it in an IPython shell (e.g., using an IDE), the figures will appear in the console. Regardless, all figures are saved to the `figures/` subdirectory in pdf format.
 
 ```python Reactor_Kinetics_Kalman_Filiter.py```
 
@@ -65,3 +65,21 @@ Once you have installed dependencies and cloned the repository, simply run the `
 Have a look at the [Issues](https://github.com/Grim-bot/CROCUS-UKF/issues)! You can also contribute by suggesting a code documentation framework.
 
 ## Repository structure
+
+#### data/
+
+The [`data`](data) directory contains measurements from CROCUS, as well as prior estimates of the reactor parameter.
+
+#### figures/
+
+The [`figures`](figures) directory is where all figures are saved (using pdf format). Figures should not be committed to git, since they are stored in binary format. If you wish to commit figures, use `git-lfs`.
+
+#### Top-level
+
+The most important executable python scripts are found at the root level of the repository. Namely:
+
+`Reactor_Kinetics_Kalman_Filter.py`: This file defines and executes a series of simulations using the UKF and EKF and generates plots.
+
+#### tests/
+
+The [`tests`](tests) directory contains python files that define tests to be run at every new push (or pull request) to the master branch.
