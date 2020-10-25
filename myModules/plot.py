@@ -124,6 +124,7 @@ class NeutronPopulationPlot:
         
         plt.show()
         fig.savefig('neutron_population_tstep{:.1f}.pdf'.format(tstep), bbox_inches='tight')
+        return fig
     
     def plot_n_sd_erel(self):
         """Create a figure with 3 subplots containing respectively:
