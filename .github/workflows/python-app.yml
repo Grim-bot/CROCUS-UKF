@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install texlive
       run: |
-        sudo apt-get install texlive
+        sudo apt-get install texlive dvipng texlive-latex-extra texlive-fonts-recommended cm-super
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
