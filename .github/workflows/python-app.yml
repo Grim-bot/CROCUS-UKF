@@ -16,10 +16,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.7
+    - name: Install texlive
+      run: |
+        sudo apt-get install texlive dvipng texlive-latex-extra texlive-fonts-recommended cm-super
+    - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
-        python-version: 3.7.3.final.0
+        python-version: 3.8.5
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
