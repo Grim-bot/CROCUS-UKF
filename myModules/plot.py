@@ -7,6 +7,7 @@ Auxiliary functions used for plotting with matplotlib and latex.
 """
 
 import math
+from distutils.spawn import find_executable
 import numpy as np
 import enum
 import matplotlib
@@ -16,6 +17,9 @@ if (__name__ == '__main__'):
     import config
 else:
     import myModules.config as config
+    
+if not find_executable('latex'):
+    raise ImportError("A working Latex installation is required (unrelated to Python installation)!")
 
 matplotlib.rc('text', usetex=True)
 matplotlib.rc('font', family='serif', size=14, weight='bold')
