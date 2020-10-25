@@ -274,7 +274,6 @@ def plot_neutron_population(simulation):
     
     # %% Plot parameter estimates
 def plot_parameters(simulation):
-    print("-"*10 + "tstep: {:.2f}".format(simulation.tstep) + "-"*10)
 
     # Create a new figure
     nrows = 3
@@ -355,9 +354,10 @@ def main(time_spacings=np.logspace(2, 0, num=5).astype(np.int8)):
 #%% Run main():
 
 if __name__ == "__main__":
-    exceptions, figures = main(time_spacings=[1])    
-    for k, v in figures.items():
-        print("\n" + "-"*15 + "  tstep: {:.2f}  ".format(k.tstep) + "-"*15)
-        plt.show(v['neutron_population_plot'])
-        for fig in v['parameter_plots']:
-            plt.show(fig)
+    exceptions, figures = main(time_spacings=[100, 20])
+    plt.show(block=False)
+#    for k, v in figures.items():
+#        print("\n" + "-"*15 + "  tstep: {:.2f}  ".format(k.tstep) + "-"*15)
+#        plt.show(v['neutron_population_plot'])
+#        for fig in v['parameter_plots']:
+#            plt.show(fig, block=False)

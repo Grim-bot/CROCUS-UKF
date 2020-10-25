@@ -6,7 +6,10 @@ Version: 2019-10-03
 import numpy as np
 from scipy.linalg import expm
 #from pykalman import KalmanFilter as KF
-import config
+if (__name__ == '__main__'):
+    import config
+else:
+    import myModules.config as config
 
 class EKF:
     
