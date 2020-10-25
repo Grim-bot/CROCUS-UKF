@@ -6,7 +6,7 @@ Version: 2019-10-03
 Auxiliary functions used for plotting with matplotlib and latex.
 """
 
-import math
+import math, os
 from distutils.spawn import find_executable
 import numpy as np
 import enum
@@ -122,7 +122,7 @@ class NeutronPopulationPlot:
         tstep = self.times[1] - self.times[0]
         annotate_RKKF(ax, config.stdev_initial_factor, config.stdev_transition_dep, tstep=tstep)
         
-        fig.savefig('neutron_population_tstep{:.1f}.pdf'.format(tstep), bbox_inches='tight')
+        fig.savefig(os.path.join('figures','neutron_population_tstep{:.1f}.pdf'.format(tstep)), bbox_inches='tight')
         return fig
     
     def plot_n_sd_erel(self):
@@ -198,7 +198,7 @@ class NeutronPopulationPlot:
         
         tstep = self.times[1] - self.times[0]
         plt.show(block=False)
-        fig.savefig('neutron_population_tstep{:.1f}.pdf'.format(tstep), bbox_inches='tight')
+        fig.savefig(os.path.join('figures','neutron_population_tstep{:.1f}.pdf'.format(tstep)), bbox_inches='tight')
 
 
 

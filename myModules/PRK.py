@@ -7,6 +7,7 @@ Version: 2019-05-10 (May 10th, 2019)
 The Point Reactor Kinetics Equations are implemented here.
 """
 
+import os, warnings
 import numpy as np
 if (__name__ == '__main__'):
     import util
@@ -538,18 +539,60 @@ if (__name__ == '__main__'):
     
     fig, axes_list = plt.subplots(nrows=1, ncols=1, figsize=[plot.figure_width, plot.figure_width * 11/16], gridspec_kw={'top': 9/11})
     
-    final_state, rod_drop = crocus.rod_drop((0, end_time), reactivity_unitless=reactivity, initial_neutron_population=1)
-    plt.gca().plot(rod_drop.times, rod_drop.neutron_populations(), 'm', label=label_dollars(reactivity, dollars, '+'))
-    print(rod_drop.at(0.3))
+    try:
+        final_state, rod_drop = crocus.rod_drop(
+                (0, end_time),
+                reactivity_unitless=reactivity,
+                initial_neutron_population=1
+                )
+    except TypeError as e:
+        warnings.warn("Could not integrate the PRK equations (probably stiff).")
+        print(e)
+    else:
+        plt.gca().plot(
+                rod_drop.times,
+                rod_drop.neutron_populations(),
+                'm',
+                label=label_dollars(reactivity, dollars, '+')
+                )
+        print(rod_drop.at(0.3))
     
-    final_state, rod_drop = crocus.rod_drop((0, end_time), reactivity_unitless=-reactivity, initial_neutron_population=1)
-    plt.gca().plot(rod_drop.times, rod_drop.neutron_populations(), 'b--', label=label_dollars(reactivity, dollars, '-'))
+    try:
+        final_state, rod_drop = crocus.rod_drop(
+                (0, end_time),
+                reactivity_unitless=-reactivity,
+                initial_neutron_population=1
+                )
+    except TypeError as e:
+        warnings.warn("Could not integrate the PRK equations (probably stiff).")
+        print(e)
+    else:
+        plt.gca().plot(
+                rod_drop.times,
+                rod_drop.neutron_populations(),
+                'b--',
+                label=label_dollars(reactivity, dollars, '-')
+                )
     
     dollars = 1.001
     reactivity = crocus.fuel.beta() * dollars # unitless
     
-    final_state, rod_drop = crocus.rod_drop((0, end_time), reactivity_unitless=-reactivity, initial_neutron_population=1)
-    plt.gca().plot(rod_drop.times, rod_drop.neutron_populations(), 'b--', label=label_dollars(reactivity, dollars, '-'))
+    try:
+        final_state, rod_drop = crocus.rod_drop(
+                (0, end_time),
+                reactivity_unitless=-reactivity,
+                initial_neutron_population=1
+                )
+    except TypeError as e:
+        warnings.warn("Could not integrate the PRK equations (probably stiff).")
+        print(e)
+    else:
+        plt.gca().plot(
+                rod_drop.times,
+                rod_drop.neutron_populations(),
+                'b--',
+                label=label_dollars(reactivity, dollars, '-')
+                )
     
     print(rod_drop.states[-1][0])
     plt.gca().axhline(y=1, xmin=0, xmax=end_time, c='k')
@@ -559,7 +602,7 @@ if (__name__ == '__main__'):
     plt.ylabel(r"$\frac{n(t)}{n(t=0)}$")
     plt.gca().legend(bbox_to_anchor=(0,1, 1, 0), loc='lower left', mode='expand', ncol=2, frameon=True, framealpha=1, edgecolor='k')#, labelspacing=0.1)
     
-    plt.savefig(fname='PRK_transients.pdf', bbox_inches='tight')
+    plt.savefig(fname=os.path.join('figures','PRK_transients.pdf'), bbox_inches='tight')
     plt.show()
     
     fig, axes_list = plt.subplots(nrows=1, ncols=1, figsize=[plot.figure_width, plot.figure_width * 10.5/16], gridspec_kw={'top': 9/10.5})
@@ -573,7 +616,7 @@ if (__name__ == '__main__'):
     plt.ylabel(r"$\frac{n(t)}{n(t=0)}$")
     plt.gca().legend(bbox_to_anchor=(0,1, 1, 0), loc='lower left', mode='expand', ncol=1, frameon=True, framealpha=1, edgecolor='k')#, labelspacing=0.1)
     
-    plt.savefig(fname='PRK_transients_b.pdf', bbox_inches='tight')
+    plt.savefig(fname=os.path.join('figures','PRK_transients_b.pdf'), bbox_inches='tight')
     plt.show()
     
     
@@ -618,7 +661,7 @@ if (__name__ == '__main__'):
     plt.ylabel(r"$\frac{n(t)}{n(t=0)}$")
     plt.gca().legend(bbox_to_anchor=(0,1, 1, 0), loc='lower left', mode='expand', ncol=3, frameon=True, framealpha=1, edgecolor='k')#, labelspacing=0.1)
     
-    plt.savefig(fname='PRK_neutron_population.pdf', bbox_inches='tight')
+    plt.savefig(fname=os.path.join('figures','PRK_neutron_population.pdf'), bbox_inches='tight')
     plt.show()
     
     
@@ -647,7 +690,7 @@ if (__name__ == '__main__'):
     plt.ylabel(r"$\frac{n(t)}{n(t=0)}$")
     plt.gca().legend(bbox_to_anchor=(0,1, 1, 0), loc='lower left', mode='expand', ncol=2, frameon=True, framealpha=1, edgecolor='k')#, labelspacing=0.1)
     
-    plt.savefig(fname='PRK_neutron_population_b.pdf', bbox_inches='tight')
+    plt.savefig(fname=os.path.join('figures','PRK_neutron_population_b.pdf'), bbox_inches='tight')
     plt.show()
     
     
@@ -681,7 +724,7 @@ if (__name__ == '__main__'):
     plt.ylabel(r"$\frac{n(t)}{n(t=0)}$")
     plt.gca().legend(bbox_to_anchor=(0,1, 1, 0), loc='lower left', mode='expand', ncol=2, frameon=True, framealpha=1, edgecolor='k')#, labelspacing=0.1)
     
-    plt.savefig(fname='PRK_neutron_population_c.pdf', bbox_inches='tight')
+    plt.savefig(fname=os.path.join('figures','PRK_neutron_population_c.pdf'), bbox_inches='tight')
     plt.show()
     
     

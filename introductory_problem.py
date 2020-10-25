@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """The introductory problem of a moving car is implemented here, using the pykalman module. Plotting is done using matplotlib, and of course the numpy package is used.
 """
-import math
+import math, os
 import numpy as np
 import matplotlib.pyplot as plt
 import pykalman
@@ -180,15 +180,15 @@ ax.plot(
 # Labels, legend, annotation
 ax.set(xlabel="Time [s]", ylabel="Error [m]", title=r"Absolute error of the estimates of $x_1(t)$")
 myplot.legend(ax, myplot.errorize([r'$z_1^{(i)}$', r'$\hat x_1^{(i)}$', r'$\hat x_1^{(i|i-1)}$', r'$\hat x_1^{(i|i)}$']), ncol=2)
-plt.savefig('distance_plot.pdf', bbox_inches='tight')
+plt.savefig(os.path.join('figures','distance_plot.pdf'), bbox_inches='tight')
 
 
 ###############################################################################
 # %% PLOT THE COVARIANCE MATRICES ################
 
 fig_COVs = myplot.plot_matrices(COVs_filtered[1:], dt, non_neg=False, title=r'Visualization of $\mathbf{\Sigma}_{\hat \mathbf{x} \hat \mathbf{x}}^{(i|i)}$ for $i = 1,\dots,n-1$', include_zero=False)
-fig_COVs.savefig('Covariance.pdf', bbox_inches='tight')
+fig_COVs.savefig(os.path.join('figures','Covariance.pdf'), bbox_inches='tight')
 
 CORRs_filtered = [ut.cov2corr(COV) for COV in COVs_filtered]
 fig_CORRs = myplot.plot_matrices(CORRs_filtered[1:], dt, non_neg=False, title='Matrix of correlation coefficients of $\mathbf{\hat x}^{(i|i)}$ for $i = 1,\dots,n-1$', include_zero=False)
-fig_CORRs.savefig('Correlation_coeffs.pdf', bbox_inches='tight')
+fig_CORRs.savefig(os.path.join('figures','Correlation_coeffs.pdf'), bbox_inches='tight')

@@ -325,7 +325,7 @@ def plot_parameters(simulation):
     myplot.plot_param(axes_leftcol[0], 'beta', simulation.times, simulation.states_UKF[:,simulation.crocus.slc_beta_l].sum(axis=1), simulation.states_EKF[:,simulation.crocus.slc_beta_l].sum(axis=1), Simulation.params['BETA_MEAN'].flatten()[0], Simulation.params['BETA_STD'].flatten()[0])
     
     for fig_num in range(nfigs):
-        figs[fig_num].savefig('UKF_indep_tstep{:.1f}_{}.pdf'.format(simulation.tstep, fig_num), bbox_inches='tight')
+        figs[fig_num].savefig(os.path.join('figures','UKF_indep_tstep{:.1f}_{}.pdf'.format(simulation.tstep, fig_num)), bbox_inches='tight')
         
     return figs
 
@@ -354,7 +354,7 @@ def main(time_spacings=np.logspace(2, 0, num=5).astype(np.int8)):
 #%% Run main():
 
 if __name__ == "__main__":
-    exceptions, figures = main(time_spacings=[100, 20])
+    exceptions, figures = main(time_spacings=[1])
     plt.show(block=False)
 #    for k, v in figures.items():
 #        print("\n" + "-"*15 + "  tstep: {:.2f}  ".format(k.tstep) + "-"*15)

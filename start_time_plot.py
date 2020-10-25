@@ -1,4 +1,4 @@
-import math
+import math, os
 import numpy as np
 from scipy.io import loadmat
 import scipy.signal as signal
@@ -57,7 +57,7 @@ ind_start = np.asarray(observations_smoothed >= 2*max_resting).nonzero()[0][0]
 ax.axvline(ind_start * tstep_observation, color='k', label='Approximate time of reactivity insertion', ymax = 0.7)
 
 myplot.legend(ax)
-fig.savefig('time_of_rod_drop.pdf')
+fig.savefig(os.path.join('figures','time_of_rod_drop.pdf'))
 
 #tup = (1, 3, "spam")
 #print(repr(tup))
