@@ -60,7 +60,7 @@ Next:
 """
 # %% Set-up
 
-import math
+import math, os
 
 from scipy.io import loadmat
 import numpy as np
@@ -95,8 +95,8 @@ def set_config():
 # %% Initialize kalman filters
 
 class Simulation:
-    file_params = 'data/kinetics_params.mat'
-    file_observations = 'data/2016-10-19_CR worth_600mm 0,1s.TKA'
+    file_params = os.path.join('data', 'kinetics_params.mat')
+    file_observations = os.path.join('data', '2016-10-19_CR worth_600mm 0,1s.TKA')
     tstep_observation = 0.1 # seconds
     last_observation_time = 300 # s
     control_rod_height = 600 # mm
@@ -109,7 +109,7 @@ class Simulation:
             ])
     stdev_reactivity_dollars = 0.008
                                            
-    params = loadmat(file_params)
+    params = loadmat(os.path.join(os.getcwd(), file_params))
     crocus = prk.PointReactor(params['LAMBDA_MEAN'].flatten()[1:], params['BETA_MEAN'].flatten()[1:], params['GEN_TIME_MEAN'].flatten()[0])
     crocus.set_include_params(True)
     uncertainties = prk.Fuel(params['LAMBDA_STD'].flatten()[1:], params['BETA_STD'].flatten()[1:], params['GEN_TIME_STD'].flatten()[0])
@@ -266,81 +266,73 @@ def run_simulations(simulations):
     return exceptions
 
     # %% Plot estimates and estimated uncertainty of neutron population
-def plot_neutron_population(simulations):
-    figs = []
-    for simulation in simulations:
-        print("\n" + "-"*15 + "  tstep: {:.2f}  ".format(simulation.tstep) + "-"*15)
-        neutron_population_plot = myplot.NeutronPopulationPlot(
-                simulation.neutron_population_results
-                )
-        figs.append( neutron_population_plot.plot_n_shaded())
-    return figs
+def plot_neutron_population(simulation):
+    neutron_population_plot = myplot.NeutronPopulationPlot(
+            simulation.neutron_population_results
+            )
+    return neutron_population_plot.plot_n_shaded()
     
     # %% Plot parameter estimates
-def plot_parameters(simulations):
-    all_figs = []
-    for simulation in simulations:
-        print("-"*10 + "tstep: {:.2f}".format(simulation.tstep) + "-"*10)
+def plot_parameters(simulation):
+    print("-"*10 + "tstep: {:.2f}".format(simulation.tstep) + "-"*10)
+
+    # Create a new figure
+    nrows = 3
+    nfigs = math.ceil((Simulation.crocus.fuel.ngroups() + 2) / nrows)
+    figs, axes_leftcol, axes_rightcol = [], [], []
+    for fig_num in range(nfigs):
+        # Create a figure
+        fig, axes_list = plt.subplots(nrows=nrows, ncols=2, figsize=[myplot.figure_width, myplot.figure_width * 1.414], gridspec_kw={'hspace': 0.8, 'top': 0.84, 'wspace': 0.25})
+        fig.suptitle(u'Estimation of independent variables with UKF and EKF ({fig_num}/{nfigs})\n(${sigmas[0]}$, ${sigmas[1]}$)'.format(fig_num=fig_num+1, nfigs=nfigs, sigmas=myplot.annot_strs_RKKF(config.stdev_initial_factor, config.stdev_transition_dep)), fontsize=22)
+        if fig_num == 0 and config.include_reactivity:
+            # Replace the top two axes by one wider axis:
+            for ax in axes_list[0,:]:
+                ax.remove()
+            ax_top = fig.add_subplot(axes_list[1,1].get_gridspec()[0,:])
+            axes_list = axes_list[1:, :]
+        #Sore the axes and the figure
+        figs.append(fig)
+        axes_leftcol = np.concatenate((axes_leftcol, axes_list[:,0]))
+        axes_rightcol = np.concatenate((axes_rightcol, axes_list[:,1]))
     
-        # Create a new figure
-        nrows = 3
-        nfigs = math.ceil((Simulation.crocus.fuel.ngroups() + 2) / nrows)
-        figs, axes_leftcol, axes_rightcol = [], [], []
-        for fig_num in range(nfigs):
-            # Create a figure
-            fig, axes_list = plt.subplots(nrows=nrows, ncols=2, figsize=[myplot.figure_width, myplot.figure_width * 1.414], gridspec_kw={'hspace': 0.8, 'top': 0.84, 'wspace': 0.25})
-            fig.suptitle(u'Estimation of independent variables with UKF and EKF ({fig_num}/{nfigs})\n(${sigmas[0]}$, ${sigmas[1]}$)'.format(fig_num=fig_num+1, nfigs=nfigs, sigmas=myplot.annot_strs_RKKF(config.stdev_initial_factor, config.stdev_transition_dep)), fontsize=22)
-            if fig_num == 0 and config.include_reactivity:
-                # Replace the top two axes by one wider axis:
-                for ax in axes_list[0,:]:
-                    ax.remove()
-                ax_top = fig.add_subplot(axes_list[1,1].get_gridspec()[0,:])
-                axes_list = axes_list[1:, :]
-            #Sore the axes and the figure
-            figs.append(fig)
-            axes_leftcol = np.concatenate((axes_leftcol, axes_list[:,0]))
-            axes_rightcol = np.concatenate((axes_rightcol, axes_list[:,1]))
+    # Remove unused axes:
+    axes_leftcol = util.remove_excess_axes(axes_leftcol, Simulation.crocus.fuel.ngroups() + 1)
+    axes_rightcol = util.remove_excess_axes(axes_rightcol, Simulation.crocus.fuel.ngroups() + 1)
+    # Plot estimates of the parameters:
+    axes_list_shuffle = np.concatenate((
+            # For the beta_i :
+            axes_leftcol[1:],
+            # For the lambda_i :
+            axes_rightcol[1:],
+            # For Lambda :
+            axes_rightcol[0:1]
+            ))
+    if config.include_reactivity:
+        axes_list_shuffle = np.insert(axes_list_shuffle, 0, ax_top)
+    
+    for ax, parname, index, prior, prior_stdev in zip(
+            axes_list_shuffle,
+            Simulation.crocus.fuel.param_names(),
+            range(Simulation.crocus.nvars, Simulation.crocus.state_dims),
+            Simulation.crocus.fuel.param_values(Simulation.reactivity_unitless),
+            Simulation.uncertainties.param_values(
+                    Simulation.stdev_reactivity_unitless
+                    )
+            ):
+        myplot.plot_param(ax, parname, simulation.times, simulation.states_UKF, simulation.states_EKF, prior, prior_stdev, index=index, COVs_UKF=simulation.COVs_UKF, COVs_EKF=simulation.COVs_EKF)
+    #######################################
+    #    if index > 9:
+    #        break
+    myplot.plot_param(axes_leftcol[0], 'beta', simulation.times, simulation.states_UKF[:,simulation.crocus.slc_beta_l].sum(axis=1), simulation.states_EKF[:,simulation.crocus.slc_beta_l].sum(axis=1), Simulation.params['BETA_MEAN'].flatten()[0], Simulation.params['BETA_STD'].flatten()[0])
+    
+    for fig_num in range(nfigs):
+        figs[fig_num].savefig('UKF_indep_tstep{:.1f}_{}.pdf'.format(simulation.tstep, fig_num), bbox_inches='tight')
         
-        # Remove unused axes:
-        axes_leftcol = util.remove_excess_axes(axes_leftcol, Simulation.crocus.fuel.ngroups() + 1)
-        axes_rightcol = util.remove_excess_axes(axes_rightcol, Simulation.crocus.fuel.ngroups() + 1)
-        # Plot estimates of the parameters:
-        axes_list_shuffle = np.concatenate((
-                # For the beta_i :
-                axes_leftcol[1:],
-                # For the lambda_i :
-                axes_rightcol[1:],
-                # For Lambda :
-                axes_rightcol[0:1]
-                ))
-        if config.include_reactivity:
-            axes_list_shuffle = np.insert(axes_list_shuffle, 0, ax_top)
-        
-        for ax, parname, index, prior, prior_stdev in zip(
-                axes_list_shuffle,
-                Simulation.crocus.fuel.param_names(),
-                range(Simulation.crocus.nvars, Simulation.crocus.state_dims),
-                Simulation.crocus.fuel.param_values(Simulation.reactivity_unitless),
-                Simulation.uncertainties.param_values(
-                        Simulation.stdev_reactivity_unitless
-                        )
-                ):
-            myplot.plot_param(ax, parname, simulation.times, simulation.states_UKF, simulation.states_EKF, prior, prior_stdev, index=index, COVs_UKF=simulation.COVs_UKF, COVs_EKF=simulation.COVs_EKF)
-        #######################################
-        #    if index > 9:
-        #        break
-        myplot.plot_param(axes_leftcol[0], 'beta', simulation.times, simulation.states_UKF[:,simulation.crocus.slc_beta_l].sum(axis=1), simulation.states_EKF[:,simulation.crocus.slc_beta_l].sum(axis=1), Simulation.params['BETA_MEAN'].flatten()[0], Simulation.params['BETA_STD'].flatten()[0])
-        
-        for fig_num in range(nfigs):
-            figs[fig_num].savefig('UKF_indep_tstep{:.1f}_{}.pdf'.format(simulation.tstep, fig_num), bbox_inches='tight')
-            plt.show(fig)
-        
-        all_figs = all_figs + figs
-    return all_figs
+    return figs
 
 #%% Define main():
     
-def main(time_spacings=np.logspace(0, 2, num=5).astype(np.int8)):
+def main(time_spacings=np.logspace(2, 0, num=5).astype(np.int8)):
     set_config()
 
     simulations = [Simulation(keep_every) for keep_every in time_spacings]
@@ -352,11 +344,20 @@ def main(time_spacings=np.logspace(0, 2, num=5).astype(np.int8)):
         traceback.print_tb(exc[2]) # Traceback object
         print(repr(exc[0]) + ":    " + repr(exc[1])) # Error class and message
     
-    figs = plot_neutron_population(simulations)
-    figs = figs + plot_parameters(simulations)
+    figs = {}
+    for simulation in simulations:
+        figs[simulation] = {
+                'neutron_population_plot': plot_neutron_population(simulation),
+                'parameter_plots':         plot_parameters(simulation)
+                }
     return exceptions, figs
 
 #%% Run main():
 
 if __name__ == "__main__":
-    exceptions, figures = main()    
+    exceptions, figures = main(time_spacings=[100, 1])    
+    for k, v in figures.items():
+        print("\n" + "-"*15 + "  tstep: {:.2f}  ".format(k.tstep) + "-"*15)
+        plt.show(v['neutron_population_plot'])
+        for fig in v['parameter_plots']:
+            plt.show(fig)

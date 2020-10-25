@@ -122,7 +122,6 @@ class NeutronPopulationPlot:
         tstep = self.times[1] - self.times[0]
         annotate_RKKF(ax, config.stdev_initial_factor, config.stdev_transition_dep, tstep=tstep)
         
-        plt.show()
         fig.savefig('neutron_population_tstep{:.1f}.pdf'.format(tstep), bbox_inches='tight')
         return fig
     
@@ -198,7 +197,7 @@ class NeutronPopulationPlot:
         annotate_RKKF(ax_SE, config.stdev_initial_factor, config.stdev_transition_dep, loc_x=0.29)
         
         tstep = self.times[1] - self.times[0]
-        plt.show()
+        plt.show(block=False)
         fig.savefig('neutron_population_tstep{:.1f}.pdf'.format(tstep), bbox_inches='tight')
 
 
@@ -456,5 +455,5 @@ def plot_matrices(M_list, dt, title='Matrices', non_neg=False, include_zero=Fals
             plt.colorbar(image, cax=ax_colorbar)
         else:
             ax.imshow(M, vmin=M_min, vmax=M_max, cmap=M_cmap)
-    plt.show()
+    plt.show(block=False)
     return fig
